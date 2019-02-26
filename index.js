@@ -23,7 +23,7 @@ app.use(session({
   secret: 'our apps little secret',
   resave: false,
   saveUninitialized: true,
-  cookie: { maxAge: 60000 }
+  cookie: { maxAge: 60000, httpOnly: false }
 }))
 
 app.use(bodyParser.urlencoded({
