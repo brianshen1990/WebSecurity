@@ -31,8 +31,8 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(bodyParser.json());
-app.use(helmet.referrerPolicy({ policy: 'same-origin' }));
-app.disable('x-powered-by');
+app.use(helmet.xssFilter());
+
 
 const REFERES = [
   'http://localhost:8888',
@@ -142,6 +142,31 @@ app.get('/api/transferPoints', refererCheck, auth, (req, res) => {
     res.status(401).send({messgae: 'user not exists!'})
     return;
   }
+});
+
+app.get('/viewPage.html', (req, res) => { 
+  const tempVal = req.param('search');
+  console.log(tempVal);
+  let html = `<html>
+  <head>
+    <script type="text/javascript" src="jquery-3.3.1.min.js"></script>
+    <script type="text/javascript">
+      const testXss = function(){
+        window.location = "?search=" + $("#xssId").val();
+      }
+    </script>
+  </head>
+  <body>
+  <br>
+  XSS Tested:
+  <input type="text" id="xssId" > &nbsp; <input type="button" onclick="testXss()" value="Search" />
+  <div>
+    You searched: <span id="xssReflected">${tempVal}</span>
+  </div>
+  </body>
+  </html>` ;
+
+  res.send(html); 
 });
 
 app.get('/api/', (req, res) => res.send('Hello World!'))

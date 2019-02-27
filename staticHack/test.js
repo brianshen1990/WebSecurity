@@ -1,0 +1,1 @@
+alert("I take over the browser now!")

@@ -1,0 +1,18 @@
+<html>
+<head>
+  <script type="text/javascript" src="jquery-3.3.1.min.js"></script>
+  <script type="text/javascript">
+    const testXss = function(){
+      window.location = "?search=" + $("#xssId").val();
+    }
+  </script>
+</head>
+<body>
+<br>
+XSS Tested:
+<input type="text" id="xssId" > &nbsp; <input type="button" onclick="testXss()" value="Search" />
+<div>
+  You searched: <span id="xssReflected"></span>
+</div>
+</body>
+</html>
