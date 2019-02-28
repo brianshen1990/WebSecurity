@@ -33,6 +33,7 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 app.use(helmet.referrerPolicy({ policy: 'same-origin' }));
 app.disable('x-powered-by');
+app.use(helmet.noSniff());
 
 const REFERES = [
   'http://localhost:8888',
