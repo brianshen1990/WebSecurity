@@ -57,6 +57,29 @@ app.post('/api/addUser', (req, res) => {
   }
 });
 
+
+const setCSRF  = function(req, res) {
+  const tempCsrf = `${Math.random()}`;
+  req.session.csrf = tempCsrf;
+  res.setHeader("csrf", tempCsrf);
+}
+
+const clearCSRF  = function(req, res) {
+  req.session.csrf = '';
+}
+
+const checkCSRF = function(req, res, next) {
+  console.log(req.headers.csrf);
+  console.log(req.session.csrf);
+  if ( req.headers.csrf && req.session.csrf && req.session.csrf === req.headers.csrf ){
+    setCSRF(req, res);
+    next();
+  } else {
+    clearCSRF(req, res);
+    res.status(403).send({messgae: 'CSRF Failure!'})
+  }
+}
+
 app.post('/api/login', (req, res) => {
   if (req.body.name && req.body.passwd) {
     if (!UserInfo[req.body.name]) {
@@ -67,7 +90,10 @@ app.post('/api/login', (req, res) => {
       if ( UserInfo[req.body.name].passwd === derivedKey ) {
         req.session.login = true;
         req.session.name = req.body.name;
-        res.status(200).send({messgae: 'success!'})
+        setCSRF(req, res);
+        res.status(200).send({
+          messgae: 'success!'
+        });
         return;
       } else {
         req.session.login = false;
@@ -100,7 +126,7 @@ app.get('/api/getPoints', auth, (req, res) => {
   return;
 });
 
-app.post('/api/transferPoints', auth, (req, res) => {
+app.post('/api/transferPoints', auth, checkCSRF, (req, res) => {
   if (UserInfo[req.body.dstUser]) {
     UserInfo[req.session.name].points = UserInfo[req.session.name].points - 5;
     UserInfo[req.body.dstUser].points = UserInfo[req.body.dstUser].points + 5;
@@ -118,7 +144,7 @@ app.post('/api/transferPoints', auth, (req, res) => {
 
 app.get('/api/', (req, res) => res.send('Hello World!'))
 
-app.use(express.static('staticFileSafe'))
+app.use(express.static('staticFileSafeCSRF'))
 
 app.listen(8888, () => console.log('Example app listening on port 8888!'))
 

@@ -1,0 +1,30 @@
+<html>
+
+<head>
+  <script type="text/javascript" src="jquery-3.3.1.min.js"></script>
+  <script type="text/javascript" src="test.js"></script>
+</head>
+
+<body>
+  <meta name="csrf-token" id="csrf-token">
+  <div id='logon'>
+    <h5>Logon</h5>
+    <input type="text" id="name" />&nbsp;
+    <input type="text" id="passwd" />&nbsp;
+    <input type="button" onclick="logon()" value="Logon" />
+  </div>
+
+  <div id='main'>
+    <h5>Points</h5>
+    <span id="points"></span>&nbsp;
+    <input type="button" onclick="getPoints()" value="getpoints" />
+    <br />
+    <input type="text" id="dstUser" />&nbsp;
+    <input type="button" onclick="transfer()" value="Transfer" />
+  </div>
+</body>
+
+<br>
+<a href='http://localhost:8889'>Go To 8889</a>
+
+</html>
