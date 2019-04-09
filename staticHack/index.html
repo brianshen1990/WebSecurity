@@ -1,12 +1,21 @@
 <html>
-
-<head>
-</head>
-
+  <head>
+    <script type="text/javascript" src="jquery-3.3.1.min.js"></script>
+    <script>
+      const test = function(){
+        $.ajax({
+          method: "GET",
+          url: "http://localhost:8888/api/",
+        }).done( function( msg ) {
+          alert(msg);
+        });
+      }
+    </script>
+  </head>
 <body>
   <div>
-    <h5>Hack</h5>
-    <a href='http://localhost:8888/api/transferPoints?dstUser=user02'>Click and you can get some discount in Amazon!</a>
+    <h5>Hack Dev</h5>
+    <button onclick="test()">Load Resource From 8888.</button>
   </div>
 </body>
 

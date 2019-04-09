@@ -1,12 +1,12 @@
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
-const helmet = require('helmet')
 const fs = require('fs');
 const crypto = require('crypto');
 const app = express();
 const UserInfoFile = './data/userInfo.json';
 const UserInfo = require(UserInfoFile);
+const cors = require('cors');
 
 const saveUser = function() {
   return new Promise( (resolve, reject) => {
@@ -25,42 +25,15 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   cookie: { maxAge: 60000 }
-}));
+}))
 
 app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(bodyParser.json());
-app.use(helmet.referrerPolicy({ policy: 'same-origin' }));
-app.disable('x-powered-by');
 
-const REFERES = [
-  'http://localhost:8888',
-];
-const refererCheck = function(req, res, next) {
-  const refer = req.header('referer');
-  console.log(refer);
-  if (!refer) {
-    res.status(404).send({messgae: 'referer check failure!'})
-    return;
-  } else {
-    let found = false;
-    REFERES.forEach( (item) => {
-      if (refer.startsWith(item)) {
-        found = true;
-        return false;
-      }
-    });
-    if (found) {
-      next();
-    } else {
-      res.status(404).send({messgae: 'referer check failure!'})
-      return;
-    }
-  }
-}
 
-app.post('/api/addUser', refererCheck, (req, res) => {
+app.post('/api/addUser', (req, res) => {
   if (req.body.name && req.body.passwd) {
     if (UserInfo[req.body.name]) {
       res.status(402).send({messgae: 'name exists!'})
@@ -85,7 +58,7 @@ app.post('/api/addUser', refererCheck, (req, res) => {
   }
 });
 
-app.post('/api/login', refererCheck, (req, res) => {
+app.post('/api/login', (req, res) => {
   if (req.body.name && req.body.passwd) {
     if (!UserInfo[req.body.name]) {
       res.status(401).send({messgae: 'name or password error!'})
@@ -123,12 +96,12 @@ const auth = function(req, res, next) {
   }
 }
 
-app.get('/api/getPoints', refererCheck, auth, (req, res) => {
+app.get('/api/getPoints', auth, (req, res) => {
   res.status(200).send({points: UserInfo[req.session.name].points})
   return;
 });
 
-app.get('/api/transferPoints', refererCheck, auth, (req, res) => {
+app.get('/api/transferPoints', auth, (req, res) => {
   if (UserInfo[req.query.dstUser]) {
     UserInfo[req.session.name].points = UserInfo[req.session.name].points - 5;
     UserInfo[req.query.dstUser].points = UserInfo[req.query.dstUser].points + 5;
@@ -144,7 +117,7 @@ app.get('/api/transferPoints', refererCheck, auth, (req, res) => {
   }
 });
 
-app.get('/api/', (req, res) => res.send('Hello World!'))
+app.get('/api/',  cors(),  (req, res) => res.send('Hello World!'))
 
 app.use(express.static('staticFile'))
 
