@@ -57,7 +57,7 @@ app.post('/api/login', (req, res) => {
       if ( UserInfo[name].passwd === derivedKey ) {
         req.session.login = true;
         req.session.name = name;
-        res.status(200).send({message: 'success!'})
+        res.status(200).send({ message: 'success!', name: req.session.name })
         return;
       } else {
         req.session.login = false;
@@ -69,6 +69,11 @@ app.post('/api/login', (req, res) => {
     res.status(402).send({message: 'body broken!'})
     return;
   }
+});
+
+app.get('/api/logout', (req, res) => {
+  req.session.login = false;
+  res.send({message: 'success'})
 });
 
 const auth = function(req, res, next) {
@@ -84,6 +89,12 @@ const auth = function(req, res, next) {
     return;
   }
 }
+
+app.get('/api/checkLogin', auth, (req, res) => {
+  res.status(200).send({name: req.session.name})
+  return;
+});
+
 
 app.get('/api/getPoints', auth, (req, res) => {
   res.status(200).send({points: UserInfo[req.session.name].points})
