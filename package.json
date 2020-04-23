@@ -12,9 +12,7 @@
   "devDependencies": {},
   "scripts": {
     "start": "node index.js",
-    "startHack": "node indexHack.js",
-    "startSafe": "node indexSafe.js",
-    "start2nd": "node indexSafe.js"
+    "startSafe": "node indexSafe.js"
   },
   "repository": {
     "type": "git",
