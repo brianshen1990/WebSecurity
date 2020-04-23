@@ -3,27 +3,41 @@
 <head>
   <script type="text/javascript" src="jquery-3.3.1.min.js"></script>
   <script type="text/javascript" src="test.js"></script>
+  <style>
+    #logon, #main {
+      border: black 1px solid ; 
+      padding: 20px;
+      display: inline-block;
+    }
+  </style>
 </head>
 
-<body>
+<body >
   <div id='logon'>
     <h5>Logon</h5>
     <input type="text" id="name" />&nbsp;
     <input type="text" id="passwd" />&nbsp;
     <input type="button" onclick="logon()" value="Logon" />
+    <br /> 
+    <br /> 
+    <a href='http://localhost:8889'>Go To 8889</a>
+
   </div>
 
   <div id='main'>
-    <h5>Points</h5>
-    <span id="points"></span>&nbsp;
-    <input type="button" onclick="getPoints()" value="getpoints" />
+    <h5>Main Page for <span id="displayName" style="color:orange"> </span>
+      <input type="button" onclick="logout()" value="logout" />
+    </h5>
+    
+    Currently, you have <span id="points"></span> points. &nbsp;
+    <input type="button" onclick="getPoints()" value="Refresh Points" />
     <br />
+    <br />
+    <span style="color: red">Dangerous Zone: </span><br />
     <input type="text" id="dstUser" />&nbsp;
     <input type="button" onclick="transfer()" value="Transfer" />
+    <br /> 
   </div>
 </body>
-
-<br>
-<a href='http://localhost:8889'>Go To 8889</a>
 
 </html>

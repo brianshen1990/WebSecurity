@@ -11,8 +11,10 @@
   },
   "devDependencies": {},
   "scripts": {
-    "startUnsecure": "node index.js",
-    "startHack": "node indexHack.js"
+    "start": "node index.js",
+    "startHack": "node indexHack.js",
+    "startSafe": "node indexSafe.js",
+    "start2nd": "node indexSafe.js"
   },
   "repository": {
     "type": "git",
