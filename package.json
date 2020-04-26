@@ -11,7 +11,9 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "startSafe": "node indexSafe.js",
+    "startHack": "node indexHack.js"
   },
   "repository": {
     "type": "git",

