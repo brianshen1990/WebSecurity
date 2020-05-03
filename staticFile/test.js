@@ -9,8 +9,24 @@ const logon = function () {
       passwd: passwd 
     },
   }).done( function( msg ) {
-    $('#logon').hide();
-    $('#main').show();
+    setMainPage(msg.name)
+  });
+}
+const logout = () => {
+  $.ajax({
+    method: "GET",
+    url: "./api/logout",
+  }).done( function( msg ) {
+    setLogonPage();
+  });
+}
+
+const checkLogin = function (){
+  $.ajax({
+    method: "GET",
+    url: "./api/checkLogin",
+  }).done( function( msg ) {
+    setMainPage(msg.name)
   });
 }
 
@@ -21,6 +37,17 @@ const getPoints = function(){
   }).done( function( msg ) {
     $('#points').text(msg.points);
   });
+}
+
+const setMainPage = ( username ) => {
+  $('#logon').hide();
+  $('#main').show();
+  $('#displayName').text(username);
+  getPoints()
+}
+const setLogonPage = () => {
+  $('#logon').show();
+  $('#main').hide();
 }
 
 const transfer = function () {
@@ -36,6 +63,6 @@ const transfer = function () {
 
 
 $(document).ready(function () {
-  $('#logon').show();
-  $('#main').hide();
+  setLogonPage();
+  checkLogin()
 })
