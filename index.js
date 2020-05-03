@@ -119,7 +119,7 @@ app.get('/api/transferPoints', auth, (req, res) => {
 
 app.get('/api/', (req, res) => res.send('Hello World!'))
 
-app.get('/viewPage.html', (req, res) => { 
+app.get('/search_result.html', (req, res) => { 
   const tempVal = req.param('search');
   console.log(tempVal);
   let html = `<html>
@@ -140,7 +140,6 @@ app.get('/viewPage.html', (req, res) => {
   </div>
   </body>
   </html>` ;
-  res.set('X-XSS-Protection', 0);
   res.send(html); 
 });
 
