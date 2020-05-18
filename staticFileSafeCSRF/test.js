@@ -16,10 +16,26 @@ const logon = function () {
       name: name, 
       passwd: passwd 
     },
-  }).done( function( msg,textStatus, request ) {
-    $('#logon').hide();
+  }).done( function( msg , _, request ) {
+    setMainPage(msg.name);
     setCSRF(request);
-    $('#main').show();
+  });
+}
+const logout = () => {
+  $.ajax({
+    method: "GET",
+    url: "./api/logout",
+  }).done( function( msg ) {
+    setLogonPage();
+  });
+}
+
+const checkLogin = function (){
+  $.ajax({
+    method: "GET",
+    url: "./api/checkLogin",
+  }).done( function( msg ) {
+    setMainPage(msg.name)
   });
 }
 
@@ -31,6 +47,18 @@ const getPoints = function(){
     $('#points').text(msg.points);
   });
 }
+
+const setMainPage = ( username ) => {
+  $('#logon').hide();
+  $('#main').show();
+  $('#displayName').text(username);
+  getPoints()
+}
+const setLogonPage = () => {
+  $('#logon').show();
+  $('#main').hide();
+}
+
 const transfer = function () {
   const name = $('#dstUser').val();
   $.ajax({
@@ -42,13 +70,13 @@ const transfer = function () {
     data: {
       dstUser: name
     }
-  }).done( function( msg, textStatus, request ) {
-    setCSRF(request);
+  }).done( function( msg , _, request ) {
     getPoints();
+    setCSRF(request);
   });
 }
 
 $(document).ready(function () {
-  $('#logon').show();
-  $('#main').hide();
+  setLogonPage();
+  checkLogin()
 })

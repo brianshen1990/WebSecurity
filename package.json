@@ -11,7 +11,10 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "startHack": "node indexHack.js",
+    "startPost": "node indexPost.js",
+    "startCSRF": "node indexCSRF.js"
   },
   "repository": {
     "type": "git",

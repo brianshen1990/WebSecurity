@@ -10,11 +10,7 @@ const UserInfo = require(UserInfoFile);
 const saveUser = function() {
   return new Promise( (resolve, reject) => {
     fs.writeFile(UserInfoFile, JSON.stringify(UserInfo), (err) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve();
-      }
+      err ? reject(err) : resolve()
     });
   });
 }
@@ -26,16 +22,14 @@ app.use(session({
   cookie: { maxAge: 60000 }
 }))
 
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-
-app.post('/api/addUser', (req, res) => {
-  if (req.body.name && req.body.passwd) {
-    if (UserInfo[req.body.name]) {
-      res.status(402).send({messgae: 'name exists!'})
+app.post('/api/addUser', async (req, res) => {
+  const {name, passwd} = req.body;
+  if (name && passwd) {
+    if (UserInfo[name]) {
+      res.status(402).send({message: 'name exists!'})
       return;
     } else {
       const derivedKey = crypto.createHash('md5').update(req.body.passwd).digest("hex");
@@ -43,57 +37,64 @@ app.post('/api/addUser', (req, res) => {
         passwd: derivedKey,
         points: 200,
       };
-      saveUser().then( () => {
-        res.status(200).send({messgae: 'success!'})
-        return;
-      }).catch( (err) => {
-        res.status(500).send({messgae: 'Internal server error!'})
-        return;
-      });
+      await saveUser();
+      res.status(200).send({message: 'success!'});
     }
   } else {
-    res.status(402).send({messgae: 'body broken!'})
+    res.status(402).send({message: 'body broken!'})
     return;
   }
 });
 
 app.post('/api/login', (req, res) => {
-  if (req.body.name && req.body.passwd) {
-    if (!UserInfo[req.body.name]) {
-      res.status(401).send({messgae: 'name or password error!'})
+  const {name, passwd} = req.body;
+  if (name && passwd) {
+    if (!UserInfo[name]) {
+      res.status(401).send({message: 'name or password error!'})
       return;
     } else {
-      const derivedKey = crypto.createHash('md5').update(req.body.passwd).digest("hex");
-      if ( UserInfo[req.body.name].passwd === derivedKey ) {
+      const derivedKey = crypto.createHash('md5').update(passwd).digest("hex");
+      if ( UserInfo[name].passwd === derivedKey ) {
         req.session.login = true;
-        req.session.name = req.body.name;
-        res.status(200).send({messgae: 'success!'})
+        req.session.name = name;
+        res.status(200).send({ message: 'success!', name: req.session.name })
         return;
       } else {
         req.session.login = false;
-        res.status(401).send({messgae: 'name or password error!'})
+        res.status(401).send({message: 'name or password error!'})
         return;
       };
     }
   } else {
-    res.status(402).send({messgae: 'body broken!'})
+    res.status(402).send({message: 'body broken!'})
     return;
   }
+});
+
+app.get('/api/logout', (req, res) => {
+  req.session.login = false;
+  res.send({message: 'success'})
 });
 
 const auth = function(req, res, next) {
   if (req.session.login) {
     if (!UserInfo[req.session.name]) {
-      res.status(401).send({messgae: 'user not exists!'})
+      res.status(401).send({message: 'user not exists!'})
       return;
     } else {
       next();
     }
   } else {
-    res.status(402).send({messgae: 'auth broken!'})
+    res.status(402).send({message: 'auth broken!'})
     return;
   }
 }
+
+app.get('/api/checkLogin', auth, (req, res) => {
+  res.status(200).send({name: req.session.name})
+  return;
+});
+
 
 app.get('/api/getPoints', auth, (req, res) => {
   res.status(200).send({points: UserInfo[req.session.name].points})
@@ -111,14 +112,14 @@ app.post('/api/transferPoints', auth, (req, res) => {
     });
   return;
   } else {
-    res.status(401).send({messgae: 'user not exists!'})
+    res.status(401).send({message: 'user not exists!'})
     return;
   }
 });
 
 app.get('/api/', (req, res) => res.send('Hello World!'))
 
-app.use(express.static('staticFileSafe'))
+app.use(express.static('staticFileSafePost'))
 
-app.listen(8888, () => console.log('Example app listening on port 8888!'))
+app.listen(8888, () => console.log('Example app listening on port 8888, visit: http://localhost:8888 !'))
 
