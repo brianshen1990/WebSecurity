@@ -12,7 +12,9 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "startHack": "node indexHack.js",
+    "startShare": "node indexShare.js"
   },
   "repository": {
     "type": "git",
