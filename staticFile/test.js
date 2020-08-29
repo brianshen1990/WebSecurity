@@ -1,17 +1,22 @@
 const logon = function () {
   const name = $('#name').val();
   const passwd = $('#passwd').val();
-  $.ajax({
+  const request = $.ajax({
     method: "POST",
     url: "./api/login",
     data: { 
       name: name, 
       passwd: passwd 
     },
-  }).done( function( msg ) {
-    setMainPage(msg.name)
+    success: ( msg ) => {
+      alert(msg.message);
+    },
+    error:( httpObj ) => {
+      alert(httpObj.responseJSON.message);
+    },
   });
 }
+
 const logout = () => {
   $.ajax({
     method: "GET",

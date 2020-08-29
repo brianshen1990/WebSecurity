@@ -1,17 +1,41 @@
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
-const fs = require('fs');
 const crypto = require('crypto');
 const app = express();
-const UserInfoFile = './data/userInfo.json';
-const UserInfo = require(UserInfoFile);
 
-const saveUser = function() {
-  return new Promise( (resolve, reject) => {
-    fs.writeFile(UserInfoFile, JSON.stringify(UserInfo), (err) => {
-      err ? reject(err) : resolve()
-    });
+const { Sequelize, Model, DataTypes } = require('sequelize');
+const sequelize = new Sequelize('sqlite::memory:');
+
+class User extends Model {}
+User.init({
+  username: DataTypes.STRING,
+  passwd: DataTypes.STRING
+}, { sequelize, modelName: 'user' });
+
+
+
+const verifyUser = async (username, passwd) => {
+  // user1" OR 1==1 ; "
+  const res = await sequelize.query(`select count(*) from users where username="${username}" and passwd="${passwd}"`);
+  // const res = await sequelize.query(`select count(*) from users`);
+  return res[0][0]['count(*)'];
+}
+
+const verifyUserORM = async (username, passwd) => {
+  const res = await User.count({ where: { username, passwd } });
+  return res;
+}
+
+const initData = async () => {
+  await sequelize.sync();
+  await User.create({
+    username: 'user1',
+    passwd: crypto.createHash('md5').update('user1').digest("hex")
+  });
+  await User.create({
+    username: 'user2',
+    passwd: crypto.createHash('md5').update('user2').digest("hex")
   });
 }
 
@@ -25,94 +49,21 @@ app.use(session({
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.post('/api/addUser', async (req, res) => {
-  const {name, passwd} = req.body;
-  if (name && passwd) {
-    if (UserInfo[name]) {
-      res.status(402).send({message: 'name exists!'})
-      return;
-    } else {
-      const derivedKey = crypto.createHash('md5').update(req.body.passwd).digest("hex");
-      UserInfo[req.body.name] = {
-        passwd: derivedKey,
-        points: 200,
-      };
-      await saveUser();
-      res.status(200).send({message: 'success!'});
-    }
-  } else {
-    res.status(402).send({message: 'body broken!'})
-    return;
-  }
-});
 
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
   const {name, passwd} = req.body;
   if (name && passwd) {
-    if (!UserInfo[name]) {
+    const derivedKey = crypto.createHash('md5').update(passwd).digest("hex");
+    // const cnt = await verifyUser(name, derivedKey);
+    const cnt = await verifyUser(name, derivedKey);
+    if ( cnt >= 1 ) {
+      res.send({message: "success"});
+    } else {
       res.status(401).send({message: 'name or password error!'})
-      return;
-    } else {
-      const derivedKey = crypto.createHash('md5').update(passwd).digest("hex");
-      if ( UserInfo[name].passwd === derivedKey ) {
-        req.session.login = true;
-        req.session.name = name;
-        res.status(200).send({ message: 'success!', name: req.session.name })
-        return;
-      } else {
-        req.session.login = false;
-        res.status(401).send({message: 'name or password error!'})
-        return;
-      };
     }
+    return;
   } else {
     res.status(402).send({message: 'body broken!'})
-    return;
-  }
-});
-
-app.get('/api/logout', (req, res) => {
-  req.session.login = false;
-  res.send({message: 'success'})
-});
-
-const auth = function(req, res, next) {
-  if (req.session.login) {
-    if (!UserInfo[req.session.name]) {
-      res.status(401).send({message: 'user not exists!'})
-      return;
-    } else {
-      next();
-    }
-  } else {
-    res.status(402).send({message: 'auth broken!'})
-    return;
-  }
-}
-
-app.get('/api/checkLogin', auth, (req, res) => {
-  res.status(200).send({name: req.session.name})
-  return;
-});
-
-
-app.get('/api/getPoints', auth, (req, res) => {
-  res.status(200).send({points: UserInfo[req.session.name].points})
-  return;
-});
-
-app.get('/api/transferPoints', auth, (req, res) => {
-  if (UserInfo[req.query.dstUser]) {
-    UserInfo[req.session.name].points = UserInfo[req.session.name].points - 5;
-    UserInfo[req.query.dstUser].points = UserInfo[req.query.dstUser].points + 5;
-    saveUser().then( () => {
-      res.status(200).send({message: 'success!' });
-    }).catch( (err) => {
-      res.status(500).send({message: 'Internal Server error!' });
-    });
-  return;
-  } else {
-    res.status(401).send({message: 'user not exists!'})
     return;
   }
 });
@@ -121,5 +72,6 @@ app.get('/api/', (req, res) => res.send('Hello World!'))
 
 app.use(express.static('staticFile'))
 
-app.listen(8888, () => console.log('Example app listening on port 8888, visit: http://localhost:8888 !'))
-
+initData().then( () => {
+  app.listen(8888, () => console.log('Example app listening on port 8888, visit: http://localhost:8888 !'))
+});
